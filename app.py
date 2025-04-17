@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+'''from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -32,7 +32,7 @@ def get_contacts():
     return jsonify(emergency_contacts), 200
 
 @app.route('/location', methods=['GET'])
-def get_location():
+def get_location():'''
     return jsonify(location_data), 200
 
 if __name__ == '__main__':
