@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Women's Safety App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Women's Safety Dashboard</h1>
+
+        <section class="location-section">
+            <h2>📍 Live Location Tracking</h2>
+            <button onclick="sendLocation()">Send My Location</button>
+        </section>
+
+        <section class="contacts-section">
+            <h2>📞 Emergency Contacts</h2>
+            <form id="contactForm">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="phone" placeholder="Phone Number" required>
+                <button type="submit">Add Contact</button>
+            </form>
+            <ul id="contactList"></ul>
+        </section>
+    </div>
+
+    <script>
+        // Send location to server
+        function sendLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    fetch('/location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        })
+                    }).then(res => res.json())
+                      .then(data => alert('Location sent successfully!'));
+                });
+            } else {
+                alert('Geolocation not supported!');
+            }
+        }
+
+        // Add contact
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+
+            fetch('/add-contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone })
+            }).then(res => res.json())
+              .then(data => {
+                alert(data.message);
+                fetchContacts();
+            });
+
+            this.reset();
+        });
+
+        // Fetch contacts
+        function fetchContacts() {
+            fetch('/contacts')
+                .then(res => res.json())
+                .then(contacts => {
+                    const list = document.getElementById('contactList');
+                    list.innerHTML = '';
+                    contacts.forEach(contact => {
+                        const li = document.createElement('li');
+                        li.textContent = `${contact.name} - ${contact.phone}`;
+                        list.appendChild(li);
+                    });
+                });
+        }
+
+        // Load contacts on page load
+        window.onload = fetchContacts;
+    </script>
+</body>
+</html>
